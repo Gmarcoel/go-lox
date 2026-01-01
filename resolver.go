@@ -145,8 +145,12 @@ func (r *Resolver) visitVaStmt(stmt *Va) any {
 }
 
 func (r *Resolver) visitVariableExpr(expr *Variable) any {
-	if len(r.scopes) != 0 && r.scopes[len(r.scopes)-1].(map[string]bool)[expr.name.lexeme] == false {
-		TokenError(expr.name, "Can't read local variable in its own initializer.")
+	if len(r.scopes) != 0 {
+		scope := r.scopes[len(r.scopes)-1].(map[string]bool)
+		val, ok := scope[expr.name.lexeme]
+		if ok && val == false {
+			TokenError(expr.name, "Can't read local variable in its own initializer.")
+		}
 	}
 	r.resolveLocal(expr, expr.name)
 	return nil
@@ -205,7 +209,7 @@ func (r *Resolver) visitBinaryExpr(expr *Binary) any {
 
 func (r *Resolver) visitCallExpr(expr *Call) any {
 	r.resolve(expr.callee)
-	for argument := range expr.arguments {
+	for _, argument := range expr.arguments {
 		r.resolve(argument)
 	}
 	return nil

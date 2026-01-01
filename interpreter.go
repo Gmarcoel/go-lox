@@ -19,12 +19,12 @@ type Interpreter struct {
 
 type clockNative struct{}
 
-func (c *clockNative) arity() int32 {
+func (c *clockNative) arity() int {
 	return 0
 }
 
-func (c *clockNative) call(i *Interpreter, arguments []any) float32 {
-	return float32(time.Now().UnixNano()) / 1e9
+func (c *clockNative) call(i *Interpreter, arguments []any) any {
+	return float64(time.Now().UnixNano()) / 1e9
 }
 func (c *clockNative) String() string {
 	return "<native fn>"
@@ -34,7 +34,7 @@ func newInterpreter() *Interpreter {
 	var globals = newEnvironment()
 	var environment = globals
 
-	globals.define("clock", clockNative{})
+	globals.define("clock", &clockNative{})
 
 	return &Interpreter{globals, environment, map[Expr]int{}}
 }
